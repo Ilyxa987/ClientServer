@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Секретная передача</title>
+</head>
+
+<body>
+  <div class="container">
+    <h1>ВАЖНО</h1>
+    <p>Пожалуйста, установите данный скрипт, чтобы расшифровать переданные файлы.</p>
+      <a href="/get_script">Скриптик</a>
+    <hr>
+
+    <label><b>Количество файлов</b></label>
+    <input type="number" placeholder="0" id="numbers" required>
+
+    <div class="clearfix">
+      <button type="submit" class="downloadbut" id="down" >Скачать</button>
+      <button type="submit" onclick="get_count()" id="know">Узнать количество файлов на сервере</button>
+    </div>
+  </div>
+</body>
+<script>
+    function download(e){
+        const number = document.getElementById("numbers").value;
+        fetch("/download?" + new URLSearchParams({
+            num: number,
+            }).toString(), {
+                method: "GET",
+            }).then(response => response.blob())
+        .then(function (blob) {
+            let a = document.createElement('a');
+            a.className = "link";
+            a.innerHTML = "Скачать";
+            a.href = URL.createObjectURL(blob);
+
+            document.body.append(a);
+        });
+    }
+
+const random = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+    function get_count(e) {
+        fetch("/count").then(response => response.json())
+        .then(function(json){
+        let a = document.createElement('p');
+        a.innerHTML = "Количество файлов: " + json["count"];
+        document.body.append(a);
+        });
+    }
+
+    function down(e){
+        const keyn = random(4, 254);
+        let a = document.createElement('p');
+             a.innerHTML = "Ваш ключ: " + keyn;
+             document.body.append(a);
+        const number = document.getElementById("numbers").value;
+        document.location.href = '/download?' + new URLSearchParams({
+            num: number,
+            key: keyn
+            }).toString();
+    }
+
+document.getElementById('down').onclick = down;
+</script>
+</html>

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import StreamingResponse, FileResponse, JSONResponse
+from fastapi.encoders import jsonable_encoder
 import os
 import zipstream
 import random
@@ -10,9 +11,16 @@ app = FastAPI()
 
 dir = "Files\\"
 
+
+@app.get("/")
+async def get_site():
+    return FileResponse("index.html")
+
 @app.get("/count")
 async def Count():
-    return str(len(os.listdir(dir)))
+    data = {"count": str(len(os.listdir(dir)))}
+    json_data = jsonable_encoder(data)
+    return JSONResponse(content=json_data)
 
 
 @app.get("/get_script")
@@ -21,7 +29,7 @@ async def get_script():
 
 
 @app.get("/download")
-async def download(num : int = 0):
+async def download(num : int = 0, key : int = 4):
     if num == 0 or num > len(os.listdir(dir)):
         return "Укажите другое количество файлов"
 
@@ -30,7 +38,7 @@ async def download(num : int = 0):
             arr = file_like.read()
             sharr = bytearray()
             for i in range(len(arr)):
-                sharr.append(arr[i] ^ 4)
+                sharr.append(arr[i] ^ key)
             yield bytes(sharr)
             """arr = "abcdef\n"
             sharr = ""
