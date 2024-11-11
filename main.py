@@ -36,15 +36,15 @@ async def download(num : int = 0, key : int = 4):
     def iterable(filename):
         with open(filename, mode="rb") as file_like:
             arr = file_like.read()
-            sharr = bytearray()
-            for i in range(len(arr)):
-                sharr.append(arr[i] ^ key)
-            yield bytes(sharr)
-            """arr = "abcdef\n"
-            sharr = ""
-            for i in range(len(arr)):
-                sharr += chr(ord(arr[i]) ^ 4)
-            yield bytes(sharr, 'utf-8')"""
+        sharr = bytearray()
+        for i in range(len(arr)):
+            sharr.append(arr[i] ^ key)
+        yield bytes(sharr)
+        """arr = "abcdef\n"
+        sharr = ""
+        for i in range(len(arr)):
+            sharr += chr(ord(arr[i]) ^ 4)
+        yield bytes(sharr, 'utf-8')"""
 
     dirlist = os.listdir(dir)
     randomnumbers = list()
@@ -52,13 +52,16 @@ async def download(num : int = 0, key : int = 4):
         randomnumbers.append(random.choice(dirlist))
         dirlist.remove(randomnumbers[len(randomnumbers) - 1])
     z = zipstream.ZipFile()
+
     for data in randomnumbers:
-        z.write_iter(f"{dir}{data}", iterable(f"{dir}{data}"))
+        #z.write_iter(f"{dir}{data}", iterable(f"{dir}{data}"))
+        z.write(f"{dir}{data}")
 
     return StreamingResponse(z)
-
 
 if __name__ == '__main__':
     uvicorn.run(app,
                 host='127.0.0.1',
-                port=80)
+                port=80,
+                ssl_certfile='cert.pem',
+                ssl_keyfile='key.pem')
